@@ -1007,7 +1007,6 @@ class YoutubeDL(object):
                                                       download=download,
                                                       extra_info=extra)
 
-                # import pudb; pudb.set_trace()
                 entry_result_uploaddate = entry_result.get('upload_date')
                 if entry_result_uploaddate:
                     entry_result_uploaddate_dateobject = datetime.date(
