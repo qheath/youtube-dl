@@ -976,7 +976,6 @@ class YoutubeDL(object):
 
             x_forwarded_for = ie_result.get('__x_forwarded_for_ip')
 
-            has_seen_withinrange_vid = False
             for i, entry in enumerate(entries, 1):
                 self.to_screen('[download] Downloading video %s of %s' % (i, n_entries))
                 # This __x_forwarded_for_ip thing is a bit ugly but requires
@@ -1005,23 +1004,20 @@ class YoutubeDL(object):
                 entry_result = self.process_ie_result(entry,
                                                       download=download,
                                                       extra_info=extra)
-
-                entry_result_uploaddate = date_from_str(entry_result.get('upload_date'))
-                date_playlist_order = self.params.get('date_playlist_order')
-                daterangeobj = self.params.get('daterange')
-                dateafter = daterangeobj.start
-                datebefore = daterangeobj.end
-                if entry_result and entry_result_uploaddate and date_playlist_order in ('desc', 'asc'):
-                    if not has_seen_withinrange_vid:
-                        if entry_result_uploaddate in daterangeobj:
-                            has_seen_withinrange_vid = True
-                        elif ((date_playlist_order == 'desc' and entry_result_uploaddate < dateafter) or
-                                (date_playlist_order == 'asc' and entry_result_uploaddate > datebefore)):
-                            break
-                    elif has_seen_withinrange_vid and entry_result_uploaddate not in daterangeobj:
-                        break
-
                 playlist_results.append(entry_result)
+
+                if entry_result:
+                    entry_result_upload_date = date_from_str(entry_result.get('upload_date'))
+                    if entry_result_upload_date:
+                        date_range = self.params.get('daterange')
+                        if self.params.get('playlistreverse', False):
+                            if entry_result_upload_date > date_range.end:
+                                self.to_screen('[download] The rest of the playlist is too recent, aborting')
+                                break
+                        else:
+                            if entry_result_upload_date < date_range.start:
+                                self.to_screen('[download] The rest of the playlist is too old, aborting')
+                                break
 
             ie_result['entries'] = playlist_results
             self.to_screen('[download] Finished downloading playlist: %s' % playlist)
