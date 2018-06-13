@@ -60,14 +60,6 @@ class FFmpegPostProcessor(PostProcessor):
         if not self.available:
             raise FFmpegPostProcessorError('ffmpeg or avconv not found. Please install one.')
 
-        required_version = '10-0' if self.basename == 'avconv' else '1.0'
-        if is_outdated_version(
-                self._versions[self.basename], required_version):
-            warning = 'Your copy of %s is outdated, update %s to version %s or newer if you encounter any errors.' % (
-                self.basename, self.basename, required_version)
-            if self._downloader:
-                self._downloader.report_warning(warning)
-
     @staticmethod
     def get_versions(downloader=None):
         return FFmpegPostProcessor(downloader)._versions
@@ -515,19 +507,6 @@ class FFmpegMergerPP(FFmpegPostProcessor):
 
     def can_merge(self):
         # TODO: figure out merge-capable ffmpeg version
-        if self.basename != 'avconv':
-            return True
-
-        required_version = '10-0'
-        if is_outdated_version(
-                self._versions[self.basename], required_version):
-            warning = ('Your copy of %s is outdated and unable to properly mux separate video and audio files, '
-                       'youtube-dl will download single file media. '
-                       'Update %s to version %s or newer to fix this.') % (
-                           self.basename, self.basename, required_version)
-            if self._downloader:
-                self._downloader.report_warning(warning)
-            return False
         return True
 
 
